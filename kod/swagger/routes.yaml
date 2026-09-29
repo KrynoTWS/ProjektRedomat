@@ -1,0 +1,248 @@
+
+openapi: 3.0.0
+info:
+  title: Redomat API
+  version: 1.0.0
+  description: REST API za Redomat aplikaciju virtualni red
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /counters:
+    get:
+      summary: Dohvati sve šaltere
+      responses:
+        '200':
+          description: Lista svih šaltera
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Counter'
+    post:
+      summary: Kreiraj novi šalter (admin)
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CounterInput'
+      responses:
+        '200':
+          description: Kreirani šalter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Counter'
+
+  /counters/{id}:
+    get:
+      summary: Dohvati šalter po ID-u
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Podaci šaltera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Counter'
+        '404':
+          description: Šalter nije pronađen
+    put:
+      summary: Ažuriraj šalter (admin)
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CounterInput'
+      responses:
+        '200':
+          description: Ažurirani šalter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Counter'
+    delete:
+      summary: Deaktiviraj šalter (admin)
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Šalter deaktiviran
+
+  /counters/{id}/increment:
+    post:
+      summary: Povećaj trenutni broj na šalteru (admin)
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ažurirani trenutni broj šaltera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Counter'
+  /tickets:
+    get:
+      summary: Dohvati sve tickete
+      responses:
+        '200':
+          description: Lista svih ticketa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+    post:
+      summary: Uzmi novi ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                counter_id:
+                  type: integer
+                  example: 1
+                  description: ID šaltera na kojem korisnik želi broj
+      responses:
+        '200':
+          description: Novi ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+
+  /tickets/{id}:
+    get:
+      summary: Dohvati ticket po ID-u
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Podaci ticket-a
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '404':
+          description: Ticket nije pronađen
+    put:
+      summary: Označi ticket kao served (admin)
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ticket označen kao served
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+    delete:
+      summary: Izbriši ticket (admin)
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Ticket obrisan
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Counter:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        current_number:
+          type: integer
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CounterInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+        counter_id:
+          type: integer
+        number:
+          type: integer
+        served:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
